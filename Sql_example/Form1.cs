@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Configuration;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Sql_example
 {
@@ -70,6 +71,38 @@ namespace Sql_example
                 DataSet dataSet = new DataSet();
                 adapter.Fill(dataSet);
                 dataGridView1.DataSource = dataSet.Tables[0];
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            listView1.Items.Clear();
+            SqlDataReader sqlDataReader = null;
+            try
+            {
+                SqlCommand sqlCommand = new SqlCommand("SELECT ProductName, QuantityPerUnit, UnitPrice FROM Products",
+                    _connection);
+                sqlDataReader = sqlCommand.ExecuteReader();
+                ListViewItem item = null;
+                while(sqlDataReader.Read()) {
+                    item = new ListViewItem(new string[] { 
+                        Convert.ToString(sqlDataReader["ProductName"]),
+                        Convert.ToString(sqlDataReader["QuantityPerUnit"]),
+                        Convert.ToString(sqlDataReader["UnitPrice"])
+                    });
+                    listView1.Items.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                if(sqlDataReader != null && !sqlDataReader.IsClosed)
+                {
+                    sqlDataReader.Close();
+                }
             }
         }
     }   
