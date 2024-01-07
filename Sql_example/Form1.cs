@@ -29,6 +29,17 @@ namespace Sql_example
             {
                 MessageBox.Show("sql не подключили!");
             }
+
+            // filter data greed
+            SqlDataAdapter adapter = new SqlDataAdapter(
+                "SELECT * FROM Products",
+                _connection);
+            DataSet ds = new DataSet();
+            adapter.Fill(ds);
+            dataGridView2.DataSource = ds.Tables[0];
+
+            //filter for list View
+            button3_Click(sender, null);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -76,6 +87,8 @@ namespace Sql_example
 
         private void button3_Click(object sender, EventArgs e)
         {
+            string[] row = null;
+            rows = new List<string[]>();
             listView1.Items.Clear();
             SqlDataReader sqlDataReader = null;
             try
@@ -85,12 +98,21 @@ namespace Sql_example
                 sqlDataReader = sqlCommand.ExecuteReader();
                 ListViewItem item = null;
                 while(sqlDataReader.Read()) {
-                    item = new ListViewItem(new string[] { 
+                    //item = new ListViewItem(new string[] { 
+                    //    Convert.ToString(sqlDataReader["ProductName"]),
+                    //    Convert.ToString(sqlDataReader["QuantityPerUnit"]),
+                    //    Convert.ToString(sqlDataReader["UnitPrice"])
+                    //});
+                    //listView1.Items.Add(item);
+
+                    // тут для фильтра заполняем list
+                    row = new string[]
+                    {
                         Convert.ToString(sqlDataReader["ProductName"]),
                         Convert.ToString(sqlDataReader["QuantityPerUnit"]),
                         Convert.ToString(sqlDataReader["UnitPrice"])
-                    });
-                    listView1.Items.Add(item);
+                    };
+                    rows.Add(row);
                 }
             }
             catch (Exception ex)
@@ -103,6 +125,76 @@ namespace Sql_example
                 {
                     sqlDataReader.Close();
                 }
+            }
+            RefreshList(rows);
+        }
+
+        //filter data greed
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = $"ProductName LIKE '%{textBox4.Text}%'";
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox2.SelectedIndex)
+            {
+                case 0:
+                    (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = $"UnitsInStock <= 10";
+                    break;
+                case 1:
+                    (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = $"UnitsInStock >= 10 AND UnitsInStock <= 50";
+                    break;
+                case 2:
+                    (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = $"UnitsInStock >= 50";
+                    break;
+                default:
+                    (dataGridView2.DataSource as DataTable).DefaultView.RowFilter = "";
+                    break;
+            }
+        }
+
+        //filter list View
+        private List<string[]> rows = null;
+        private List<string[]> fieredList = null;
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+            fieredList = rows.Where((x) => 
+                x[0].ToLower().Contains(textBox5.Text.ToLower())).ToList();
+            RefreshList(fieredList);
+        }
+
+        private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (comboBox3.SelectedIndex)
+            {
+                case 0:
+                    fieredList = rows.Where((x) =>
+                        Double.Parse(x[2]) <= 10).ToList();
+                    RefreshList(fieredList);
+                    break;
+                case 1:
+                    fieredList = rows.Where((x) =>
+                        Double.Parse(x[2]) >= 10 && Double.Parse(x[2]) <= 50).ToList();
+                    RefreshList(fieredList);
+                    break;
+                case 2:
+                    fieredList = rows.Where((x) =>
+                        Double.Parse(x[2]) >= 50).ToList();
+                    RefreshList(fieredList);
+                    break;
+                default:
+                    RefreshList(rows);
+                    break;
+            }
+        }
+        private void RefreshList(List<string[]> list)
+        {
+            listView1.Items.Clear();
+            foreach (string[] row in list)
+            {
+                listView1.Items.Add(new ListViewItem(row));
             }
         }
     }   
