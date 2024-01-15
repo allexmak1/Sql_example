@@ -2,7 +2,7 @@
 
 Программа для вывода инфы бд C# (WinForm).
 
-![Screnshot](https://github.com/allexmak1/Sql_example/tree/master/image/image.png)
+![Screnshot](https://github.com/allexmak1/Sql_example/blob/master/image/image.png)
 
 ## FAQ
 
